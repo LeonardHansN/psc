@@ -8,14 +8,9 @@ package mosaicga;
  *
  * @author reinh
  */
-public interface GAIndividual {
-    int getFitness();
-    
-    Object getChromosome();
-    
-    GAIndividual[] crossover(GAIndividual otherIndividual, double crossoverRate);
-    
-    void mutate(double rate);
-    
-    void printChromosome();
+public interface GAPopulation {
+    int getTopFitness();
+    void repopulate();
+    GAIndividual getFittestIndividual();
+    int getPopulationFitness();
 }
