@@ -85,11 +85,11 @@ public class MosaicGA {
 
         sol.printChromosome();
 
-        char[][] tempSol = (char[][]) sol.getChromosome();
-        String filename = "solution.txt";
+        // char[][] tempSol = (char[][]) sol.getChromosome();
+        // String filename = "solution.txt";
         
-        PrintWriter pw = new PrintWriter(filename, tempSol);
-        pw.save();
+        // PrintWriter pw = new PrintWriter(filename, tempSol);
+        // pw.save();
         
         System.out.println("Fitness dari solusi: " + solutionFitness);
     }

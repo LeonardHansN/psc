@@ -79,10 +79,9 @@ public class MosaicIndividual implements GAIndividual, Comparable<MosaicIndividu
      */
     private GAIndividual[] singlePointCO(MosaicIndividual otherIndividual,
             double rate) {
-        GAIndividual[] offsprings = new MosaicIndividual[2]; // Array yang menyimpan hasil persilangan.
-        double chance = rand.nextDouble(); // Peluang terjadi secara acak.
-
-        if (chance <= rate) { // Lakukan crossover jika peluang lebih kecil dari tingkat mutasi.
+        GAIndividual[] offsprings = new MosaicIndividual[2];
+        double chance = rand.nextDouble();
+        if (chance <= rate) {
             int size = this.problemBoard.getBoardSize();
 
             char[][] parentChromosome1 = this.blackTiles; // Kromosom parent1 adalah kromosm individu dari mana metode dipanggil
@@ -139,8 +138,80 @@ public class MosaicIndividual implements GAIndividual, Comparable<MosaicIndividu
 
         return offsprings;
     }
+    private GAIndividual[] twoPointCO(MosaicIndividual otherIndividual,
+            double rate) {
+        GAIndividual[] offsprings = new MosaicIndividual[2];
+        double chance = rand.nextDouble();
+        if (chance <= rate) {
+            int size = this.problemBoard.getBoardSize();
 
-    /**
+            char[][] parentChromosome1 = this.blackTiles;
+            char[][] parentChromosome2 = (char[][]) otherIndividual.getChromosome();
+
+            char[][] childChromosome1 = new char[size][size];
+            char[][] childChromosome2 = new char[size][size];
+
+            int crossoverPointRow = this.rand.nextInt(size);
+            int crossoverPointCol = this.rand.nextInt(size);
+            int crossoverPointCol2 = this.rand.nextInt(size-crossoverPointCol)+crossoverPointCol;
+            int crossoverPointRow2 = this.rand.nextInt(size-crossoverPointRow)+crossoverPointRow;
+            // Isi kromosom dari keturunan dengan alel-alel induk bernomor sama hingga batas crossoverPointRow
+            for (int row = 0; row < crossoverPointRow; row++) {
+                for (int col = 0; col < size; col++) {
+                    childChromosome1[row][col] = parentChromosome1[row][col];
+                    childChromosome2[row][col] = parentChromosome2[row][col];
+                }
+            }
+
+            // Mengisi row sampai batas crossoverPointCol dengan kromosom induk bernomor sesuai.
+            for (int col = 0; col < crossoverPointCol; col++) {
+                childChromosome1[crossoverPointRow][col] = parentChromosome1[crossoverPointRow][col];
+                childChromosome2[crossoverPointRow][col] = parentChromosome2[crossoverPointRow][col];
+            }
+            
+            
+            // Mengisi row dari kolom crossoverPointCol sampai batas crossoverPointCol2 dengan kromosom induk bernomor lain.
+            for (int col = crossoverPointCol; col < crossoverPointCol2; col++) {
+                childChromosome1[crossoverPointRow][col] = parentChromosome2[crossoverPointRow][col];
+                childChromosome2[crossoverPointRow][col] = parentChromosome1[crossoverPointRow][col];
+            }
+             
+            // Mengisi row dari kolom crossoverPointCol sampai batas size dengan kromosom induk bernomor sesuai.
+            for (int col = crossoverPointCol2; col < size; col++) {
+                childChromosome1[crossoverPointRow][col] = parentChromosome1[crossoverPointRow][col];
+                childChromosome2[crossoverPointRow][col] = parentChromosome2[crossoverPointRow][col];
+            }
+
+            // Lanjutkan mengisi kromosom mulai dari batas crossoverPointRow hingga batas crossoverPointRow2, namun kali ini dengan alel dari parent yang lain.
+            for (int row = crossoverPointRow + 1; row < crossoverPointRow2; row++) {
+                for (int col = 0; col < size; col++) {
+                    childChromosome1[row][col] = parentChromosome2[row][col];
+                    childChromosome2[row][col] = parentChromosome1[row][col];
+                }
+            }
+            // Lanjut mengisi kromosom mulai dari batas crossoverPointRow2 hingga terisi penuh, dengan parent yang sama
+            for (int row = crossoverPointRow2; row < size; row++) {
+                for (int col = 0; col < size; col++) {
+                    childChromosome1[row][col] = parentChromosome1[row][col];
+                    childChromosome2[row][col] = parentChromosome2[row][col];
+                }
+            }
+
+            offsprings[0] = new MosaicIndividual(childChromosome1, this.problemBoard,
+                    this.rand);
+            offsprings[1] = new MosaicIndividual(childChromosome2, this.problemBoard,
+                    this.rand);
+
+            return offsprings;
+        }
+
+        offsprings[0] = this;
+        offsprings[1] = otherIndividual;
+
+        return offsprings;
+    }
+    
+        /**
      * Method untuk melakukan mutasi sederhana dengan mengubah alel salah satu 
      * gen yang dipilih secara acak. 
      */
