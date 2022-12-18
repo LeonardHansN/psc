@@ -12,12 +12,11 @@ import java.util.ArrayList;
  */
 public class MosaicProblemBoard {
 
-    public static final char[] TILE_NUMBERS = {'0', '1', '2', '3', '4', '5', '6', '7', '8'}; // TILE_NUMBERS adalah nomor-nomor yang mungkin ada pada sebuah tile. Digunakan untuk perhitungan fitness.
     private final char[][] boardSetup; // Array yang merepresentasikan papan puzzle yang akan diselesaikan sesuai penjelasan kelas. 
     private int solutionFitness;  // Fitness yang diharapkan dari solusi untuk papan.
     private int minFitness; //Fitness minimal dari board, yaitu ketika jumlah tile hitam pada tiap tile angka melebihi angka pada tile angka tersebut.
     private int boardSize;  // Ukuran dari board.
-    private ArrayList<int[]> numTileCoords;
+    private ArrayList<int[]> numTileCoords; // ArrayList yang menampung koordinat tile yang berisi angka.
 
     /**
      * Konstruktor.
@@ -25,10 +24,12 @@ public class MosaicProblemBoard {
      * @param boardSetup merupakan kondisi awal board yang akan diselesaikan.
      */
     public MosaicProblemBoard(char[][] boardSetup) {
-        this.numTileCoords = new ArrayList();
+        // Inisialisasi
+        this.numTileCoords = new ArrayList(); 
         this.boardSetup = boardSetup;
         this.boardSize = boardSetup[0].length;
-        this.computeMaxMinFitness();
+        
+        this.computeMaxMinFitness(); // Menghitung fitness solusi dan fitness terkecil yang dapat diperoleh
     }
 
     public char[][] getBoardSetup() {  // Getter array boardSetup
@@ -43,27 +44,39 @@ public class MosaicProblemBoard {
         return this.solutionFitness;
     }
 
-    public int getMinFitness(){
+    public int getMinFitness(){ // Getter fitness terendah.
         return this.minFitness;
     }
     
-    public int getNumTile(int row, int col) {
+    public int getNumTile(int row, int col) { // Getter isi dari tile yang ditunjuk pada index row dan col yang diberikan
         return boardSetup[row][col] - 48;
     }
     
-    public ArrayList<int[]> getNumTileCoords(){
+    public ArrayList<int[]> getNumTileCoords(){ // Mengembalikan ArrayList berisi koordinat-koordinat tile yang berisi angka.
         return this.numTileCoords;
     }
 
-    private void computeMaxMinFitness() {
+    /**
+     * Menghitung fitness solusi(max) dan fitness minimal yang dapat diperoleh, 
+     * dan menempatkannya ke atribut solutionFitness dan minFitness. Method ini
+     * selalu dipanggil ketika objek MosaicProblemBoard dibuat.
+     */
+    private void computeMaxMinFitness() { 
         int maxFitness = 0;
         int minFitness = 0;
-        for (int i = 0; i < boardSize; i++) {
+        for (int i = 0; i < boardSize; i++) { // Looping untuk mengakses semua tile pada papan.
             for (int j = 0; j < boardSize; j++) {
-                if (Character.isDigit(boardSetup[i][j])) {                    
+                /*
+                Jika tile adalah digit, kurangi minFitness dengan 10, dan kali-
+                kan angka dengan 5, lalu tambahkan ke maxFitness. Dengan begini,
+                fitness dari solusi adalah 5 * (jumlah seluruh angka pada papan),
+                dan fitness terkecil adalah -10 * (jumlah seluruh angka pada pa-
+                pan)
+                */
+                if (Character.isDigit(boardSetup[i][j])) {                   
                     maxFitness += ((boardSetup[i][j] - 48) * 5); 
                     minFitness -= 10;
-                    this.numTileCoords.add(new int[]{i,j});
+                    this.numTileCoords.add(new int[]{i,j}); // Tambahkan koordinat tile angka ke numTileCoords
                 }
             }
         }
@@ -71,7 +84,10 @@ public class MosaicProblemBoard {
         this.minFitness = minFitness;
     }
     
-
+    /**
+     * Method untuk mengembalikan isi board ke papan. Hanya berfungsi untuk de-
+     * bugging.
+     */
     public void debug() {
         System.out.println("Puzzle: ");
         for (int i = 0; i < boardSetup.length; i++) {

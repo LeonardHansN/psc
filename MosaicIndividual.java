@@ -13,28 +13,36 @@ import java.util.Random;
  */
 public class MosaicIndividual implements GAIndividual, Comparable<MosaicIndividual> {
 
-    private char[][] blackTiles; // Kromosom
-    private MosaicProblemBoard problemBoard;
-    private ArrayList<int[]> numTileCoords;
-    private int individualFitness;
-    private final Random rand;
+    private char[][] blackTiles; // Kromosom individu, berisi w jika tile kosong, atau b jika tile hitam.
+    private MosaicProblemBoard problemBoard; // Masalah yang ingin diselesaikan.
+    private ArrayList<int[]> numTileCoords; // Koordinat-koordinat tile yang berisi angka untuk perhitungan fitness.
+    private int individualFitness; // Fitness individu
+    private final Random rand; // Objek random untuk menggenerasi variabel-variabel primitif secara acak.
 
     public MosaicIndividual(char[][] blackTiles, MosaicProblemBoard problemBoard,
             Random rand) {
+        //Inisialisasi
         this.blackTiles = blackTiles;
         this.problemBoard = problemBoard;
         this.numTileCoords = problemBoard.getNumTileCoords();
         this.rand = rand;
+        
         this.individualFitness = 0;
-        this.computeFitness();
+        this.computeFitness(); // Hitung fitness individu. Detail perhitungan dijelaskan pada komentar methodnya.
     }
 
     @Override
+    /**
+     * Method getter fitness individu
+     */
     public int getFitness() {
         return this.individualFitness;
     }
 
     @Override
+    /**
+     * Method getter kromosom individu
+     */
     public Object getChromosome() {
         return this.blackTiles;
     }
@@ -52,34 +60,39 @@ public class MosaicIndividual implements GAIndividual, Comparable<MosaicIndividu
     }
 
     @Override
+    /**
+     * Method untuk melakukan mutasi
+     */
     public void mutate(double rate) {
         double mutationChance = rand.nextDouble();
-        if (mutationChance <= rate) {
+        if (mutationChance <= rate) { // Lakukan mutasi jika peluang lebih kecil dari mutationRate.
             this.bitStringMutation();
+            this.computeFitness();
         }
     }
 
     /**
      * Melakukan persilangan individu dengan individu lain.
      *
-     * @param otherIndividual individu yang akan disilangkan dengan individu
-     * ini.
-     * @return array berisi 2 keturunan.
+     * @param otherIndividual individu yang akan disilangkan dengan individu ini.
+     * @return array berisi 2 keturunan jika persilangan berhasil, array berisi null jika gagal.
      */
     private GAIndividual[] singlePointCO(MosaicIndividual otherIndividual,
             double rate) {
-        GAIndividual[] offsprings = new MosaicIndividual[2];
-        double chance = rand.nextDouble();
+        GAIndividual[] offsprings = new MosaicIndividual[2]; // Array yang menyimpan hasil persilangan.
+        double chance = rand.nextDouble(); // Peluang terjadi secara acak.
 
-        if (chance <= rate) {
+        if (chance <= rate) { // Lakukan crossover jika peluang lebih kecil dari tingkat mutasi.
             int size = this.problemBoard.getBoardSize();
 
-            char[][] parentChromosome1 = this.blackTiles;
-            char[][] parentChromosome2 = (char[][]) otherIndividual.getChromosome();
+            char[][] parentChromosome1 = this.blackTiles; // Kromosom parent1 adalah kromosm individu dari mana metode dipanggil
+            char[][] parentChromosome2 = (char[][]) otherIndividual.getChromosome(); // Kromosom parent1 adalah kromosm individu dari parameter.
 
-            char[][] childChromosome1 = new char[size][size];
+            // Buat kromosom kosong.
+            char[][] childChromosome1 = new char[size][size]; 
             char[][] childChromosome2 = new char[size][size];
 
+            // Titik crossover dilakukan, diambil secara acak.
             int crossoverPointRow = this.rand.nextInt(size);
             int crossoverPointCol = this.rand.nextInt(size);
 
@@ -111,6 +124,7 @@ public class MosaicIndividual implements GAIndividual, Comparable<MosaicIndividu
                 }
             }
 
+            // Simpan ke array yang sudah dibuat
             offsprings[0] = new MosaicIndividual(childChromosome1, this.problemBoard,
                     this.rand);
             offsprings[1] = new MosaicIndividual(childChromosome2, this.problemBoard,
@@ -119,12 +133,17 @@ public class MosaicIndividual implements GAIndividual, Comparable<MosaicIndividu
             return offsprings;
         }
 
-        offsprings[0] = this;
-        offsprings[1] = otherIndividual;
+        // Jika crossover gagal, isi array dengan null.
+        offsprings[0] = null;
+        offsprings[1] = null;
 
         return offsprings;
     }
 
+    /**
+     * Method untuk melakukan mutasi sederhana dengan mengubah alel salah satu 
+     * gen yang dipilih secara acak. 
+     */
     private void bitStringMutation() {
         int rowPos = rand.nextInt(this.problemBoard.getBoardSize());
         int colPos = rand.nextInt(this.problemBoard.getBoardSize());
@@ -136,12 +155,27 @@ public class MosaicIndividual implements GAIndividual, Comparable<MosaicIndividu
     }
 
     /**
+     * Method untuk melakukan mutasi flip bit sederhana. 
+     */
+    private void flipBitMutation() {
+        int size = this.problemBoard.getBoardSize();
+        char[][] newBlackTile = new char[size][size];
+        for (int row = 0; row < size; row++) { // Iterasi untuk menukar nilai pada posisi array terakhir dengan pertama, kedua terakhir dengan kedua pertama, dst.
+            for (int col = 0; col < size; col++) {
+                newBlackTile[row][col] = this.blackTiles[size-1-row][size-1-col];
+            }
+        }
+        this.blackTiles = newBlackTile;
+    }
+
+    /**
      * Menghitung fitness dari individu dan menyimpannya ke atribut individual-
      * Fitness. Fitness disimpang di atribut tersebut karena akan sering dipang-
      * gil untuk komputasi. Method ini dipanggil ketika objek diinisialisasi.
      */
     private void computeFitness() {
-        for (int[] coords : this.numTileCoords) {
+        this.individualFitness = 0;
+        for (int[] coords : this.numTileCoords) { // Dapatkan fitness dari tiap tile angka. Selain tile angka tidak dihitung karena nilai fitnessnya nol.
             int row = coords[0];
             int col = coords[1];
             this.individualFitness += this.computeTileFitness(row, col);
@@ -158,21 +192,18 @@ public class MosaicIndividual implements GAIndividual, Comparable<MosaicIndividu
      */
     private int computeTileFitness(int row, int col) {
         int blackCount = 0;
-        for (int i = row - 1; i <= row + 1; i++) {
+        for (int i = row - 1; i <= row + 1; i++) { // Iterasi untuk mengakses semua tile yang bertetangga dengan tile yang ditunjuk, dan tile itu sendiri.
             for (int j = col - 1; j <= col + 1; j++) {
                 if (i >= 0 && j >= 0 && i < blackTiles[0].length
                         && j < blackTiles[0].length && blackTiles[i][j] == 'b') {
                     blackCount += 1;
-                    if (blackCount > this.problemBoard.getNumTile(row, col)) {
+                    if (blackCount > this.problemBoard.getNumTile(row, col)) { // Jika jumlah tile hitam melebihi angka pada tile yang fitnessnya dihitung, kurangin fitness dengan 10
                         return -10;
                     }
                 }
             }
         }
-        if (blackCount < this.problemBoard.getNumTile(row, col)) {
-            return 3*blackCount;
-        }
-        return this.problemBoard.getNumTile(row, col) * 5;
+        return blackCount * 5; //Jika tidak, kalikan angka pada tile dengan 5.
     }
 
     /**
@@ -185,7 +216,6 @@ public class MosaicIndividual implements GAIndividual, Comparable<MosaicIndividu
             }
             System.out.println();
         }
-
     }
 
     @Override

@@ -5,12 +5,29 @@
 package mosaicga;
 
 /**
- *
+ * Interface untuk populasi pada algoritma genetik. Berisi method abstrak yang 
+ * diperlukan pada algoritma genetik.
+ * 
  * @author reinh
  */
 public interface GAPopulation {
-    int getTopFitness();
+    /**
+     * @return Fitness terbaik populasi.
+     */
+    int getTopFitness(); 
+    
+    /**
+     * Mengisi populasi dengan populasi generasi berikutnya.
+     */
     void repopulate();
+    
+    /**
+     * @return individu dengan fitness terbaik.
+     */
     GAIndividual getFittestIndividual();
+    
+    /*
+     * @return Fitness total dari populasi.
+     */
     int getPopulationFitness();
 }
