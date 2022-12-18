@@ -6,7 +6,9 @@ package mosaicga;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.PrintWriter;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -43,7 +45,7 @@ public class MosaicGA {
         String thisFilePath = new File("").getAbsolutePath();
 
         //Inisialisasi problem
-        String boardPath = "\\src\\mosaicga\\board3.txt";
+        String boardPath = "/board.txt";
         char[][] problemBoardArray = boardReader(thisFilePath.concat(boardPath));
         MosaicProblemBoard mpb = new MosaicProblemBoard(problemBoardArray);
         int solutionFitness = mpb.getSolutionFitness();
@@ -58,7 +60,7 @@ public class MosaicGA {
         GAPopulation mp = new MosaicPopulation(populationSize, crossoverRate,
                 mutationRate, carryOver, mpb, rand);
         
-        String solPath = "\\src\\mosaicga\\sol3.txt";
+        String solPath = "/sol.txt";
         MosaicIndividual mi2 = new MosaicIndividual(boardReader(thisFilePath.concat(solPath)), mpb, rand);
         System.out.println(mi2.getFitness());
         
@@ -70,7 +72,7 @@ public class MosaicGA {
         int i;
         for (i = 0; i < iterLimit; i++) {
             int topFitness = mp.getTopFitness();
-            System.out.println("Iterasi ke-" + i + ", fitness terbaik = " + mp.getTopFitness());
+            //System.out.println("Iterasi ke-" + i + ", fitness terbaik = " + mp.getTopFitness());
             if (topFitness >= solutionFitness) {
                 sol = mp.getFittestIndividual();
                 break;
@@ -80,7 +82,15 @@ public class MosaicGA {
         if (sol == null) {
             sol = mp.getFittestIndividual();
         }
+
         sol.printChromosome();
+
+        char[][] tempSol = (char[][]) sol.getChromosome();
+        String filename = "solution.txt";
+        
+        PrintWriter pw = new PrintWriter(filename, tempSol);
+        pw.save();
+        
         System.out.println("Fitness dari solusi: " + solutionFitness);
     }
 

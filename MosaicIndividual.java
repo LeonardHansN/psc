@@ -185,6 +185,7 @@ public class MosaicIndividual implements GAIndividual, Comparable<MosaicIndividu
             }
             System.out.println();
         }
+
     }
 
     @Override
